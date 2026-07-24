@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "contract-testing-portfolio"
 include(":catalog-service")
+include(":checkout-service")
