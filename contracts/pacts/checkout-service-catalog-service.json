@@ -1,0 +1,88 @@
+{
+  "consumer": {
+    "name": "checkout-service"
+  },
+  "interactions": [
+    {
+      "description": "a request for product p-100",
+      "key": "12e974b",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "product p-100 exists"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/products/p-100"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "available": true,
+            "id": "p-100",
+            "name": "Mechanical Keyboard",
+            "price": 89.99
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.available": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.price": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.20"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "catalog-service"
+  }
+}
