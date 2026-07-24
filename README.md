@@ -64,3 +64,41 @@ Devuelve `404 Not Found`.
 Los tests cubren el repositorio en memoria y el contrato HTTP del controlador
 con `MockMvc`. Todavía no prueban compatibilidad entre servicios: eso será el
 objetivo de los tests Pact.
+
+## Docker Compose y CI
+
+Arrancar ambos servicios localmente:
+
+```powershell
+docker compose up --build
+```
+
+Comprobar los endpoints:
+
+```powershell
+curl.exe http://localhost:8081/products/p-100
+curl.exe http://localhost:8082/health
+```
+
+Parar y eliminar los contenedores:
+
+```powershell
+docker compose down --volumes
+```
+
+Los comandos locales equivalentes al workflow son:
+
+```powershell
+$env:JAVA_HOME="C:\tmp\temurin21\jdk-21.0.11+10"
+.\gradlew.bat :checkout-service:test --no-daemon
+.\gradlew.bat :catalog-service:test --no-daemon
+.\gradlew.bat test --no-daemon
+docker compose up --build -d
+curl.exe --fail http://localhost:8081/products/p-100
+curl.exe --fail http://localhost:8082/health
+docker compose down --volumes
+```
+
+El test de `catalog-service` incluye la verificación del contrato Pact generado por
+`checkout-service`. El workflow ejecuta primero los tests de contrato y después un
+smoke test de los dos contenedores.
