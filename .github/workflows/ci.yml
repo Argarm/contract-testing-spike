@@ -46,6 +46,13 @@ jobs:
       - name: Check checkout-service
         run: curl --fail --retry 10 --retry-delay 2 http://localhost:8082/health
 
+      - name: Check checkout-to-catalog flow
+        run: >-
+          curl --fail --retry 10 --retry-delay 2
+          -H "Content-Type: application/json"
+          -d '{"productId":"p-100","quantity":2}'
+          http://localhost:8082/checkout
+
       - name: Stop services
         if: always()
         run: docker compose down --volumes
