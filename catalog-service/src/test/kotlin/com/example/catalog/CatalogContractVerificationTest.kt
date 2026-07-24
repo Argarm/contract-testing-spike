@@ -30,6 +30,11 @@ class CatalogContractVerificationTest {
         // The catalog uses deterministic in-memory fixtures for this spike.
     }
 
+    @State("product p-200 exists and is unavailable")
+    fun productP200Unavailable() {
+        // The catalog uses deterministic in-memory fixtures for this spike.
+    }
+
     @TestTemplate
     @ExtendWith(PactVerificationInvocationContextProvider::class)
     fun verifyPact(context: PactVerificationContext) {

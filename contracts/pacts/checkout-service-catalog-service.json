@@ -72,6 +72,76 @@
       },
       "transport": "http",
       "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for unavailable product p-200",
+      "key": "f70c594",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "product p-200 exists and is unavailable"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/products/p-200"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "available": false,
+            "id": "p-200",
+            "name": "USB-C Hub",
+            "price": 39.5
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.available": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.name": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.price": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "http",
+      "type": "Synchronous/HTTP"
     }
   ],
   "metadata": {
