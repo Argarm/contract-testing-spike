@@ -4,6 +4,13 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: contract-testing-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   contract-tests:
     runs-on: ubuntu-latest
@@ -27,8 +34,6 @@ jobs:
       - name: Verify catalog-service provider contract
         run: ./gradlew :catalog-service:test --no-daemon
 
-      - name: Run all tests
-        run: ./gradlew test --no-daemon
 
   compose-smoke-test:
     runs-on: ubuntu-latest
