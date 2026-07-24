@@ -1,20 +1,27 @@
 # Contract Testing Portfolio
 
-Scaffold inicial de un portfolio de contract testing con Kotlin, Spring Boot,
-Gradle y JUnit 5.
+Spike de contract testing consumer-driven con Kotlin, Spring Boot, Gradle, JUnit 5 y Pact.
 
-Actualmente solo está implementado `catalog-service`. Pact, Docker Compose,
-`checkout-service` y GitHub Actions se añadirán en pasos posteriores.
+Actualmente incluye:
+
+- `catalog-service`, proveedor REST de productos en memoria.
+- `checkout-service`, cliente Pact del catálogo y endpoint de salud.
+- Contrato generado por el consumidor y verificado por el proveedor.
+- Docker Compose y workflow de GitHub Actions.
+
+La operación funcional `POST /checkout` y el flujo completo entre servicios son el siguiente paso.
+Todavía no se usa Pact Broker: el contrato se comparte como archivo versionado para mantener el
+alcance del spike pequeño y ejecutable localmente.
 
 ## Requisitos
 
 - JDK 21
+- Docker Desktop con el daemon Linux activo para Compose
 - PowerShell, macOS/Linux shell o un IDE compatible con Gradle
 
-El proyecto usa Gradle Wrapper, por lo que no necesitas instalar Gradle
-globalmente.
+El proyecto usa Gradle Wrapper, por lo que no necesitas instalar Gradle globalmente.
 
-## Arrancar el servicio
+## Arrancar catalog-service
 
 Desde la raíz del proyecto:
 
@@ -30,30 +37,12 @@ En Windows PowerShell:
 
 El servicio escucha en `http://localhost:8081`.
 
-## Probar el endpoint
+## Probar el catálogo
 
 ```bash
 curl http://localhost:8081/products/p-100
-```
-
-Respuesta esperada:
-
-```json
-{
-  "id": "p-100",
-  "name": "Mechanical Keyboard",
-  "price": 89.99,
-  "available": true
-}
-```
-
-Producto no existente:
-
-```bash
 curl -i http://localhost:8081/products/unknown
 ```
-
-Devuelve `404 Not Found`.
 
 ## Ejecutar tests
 
@@ -61,23 +50,35 @@ Devuelve `404 Not Found`.
 ./gradlew test
 ```
 
-Los tests cubren el repositorio en memoria y el contrato HTTP del controlador
-con `MockMvc`. Todavía no prueban compatibilidad entre servicios: eso será el
-objetivo de los tests Pact.
+El test consumidor define la expectativa HTTP y genera el contrato en:
+
+```text
+contracts/pacts/checkout-service-catalog-service.json
+```
+
+El test proveedor carga ese JSON, arranca `catalog-service` y verifica la interacción contra el
+endpoint real. La demostración de una incompatibilidad está en:
+
+```powershell
+.\scripts\demo-incompatible-pact.ps1
+```
+
+El script cambia temporalmente `available` por `isAvailable`, exige que la verificación falle y
+restaura el contrato original.
 
 ## Docker Compose y CI
 
 Arrancar ambos servicios localmente:
 
 ```powershell
-docker compose up --build
+docker compose up --build -d
 ```
 
 Comprobar los endpoints:
 
 ```powershell
-curl.exe http://localhost:8081/products/p-100
-curl.exe http://localhost:8082/health
+curl.exe --fail http://localhost:8081/products/p-100
+curl.exe --fail http://localhost:8082/health
 ```
 
 Parar y eliminar los contenedores:
@@ -89,7 +90,6 @@ docker compose down --volumes
 Los comandos locales equivalentes al workflow son:
 
 ```powershell
-$env:JAVA_HOME="C:\tmp\temurin21\jdk-21.0.11+10"
 .\gradlew.bat :checkout-service:test --no-daemon
 .\gradlew.bat :catalog-service:test --no-daemon
 .\gradlew.bat test --no-daemon
@@ -99,6 +99,5 @@ curl.exe --fail http://localhost:8082/health
 docker compose down --volumes
 ```
 
-El test de `catalog-service` incluye la verificación del contrato Pact generado por
-`checkout-service`. El workflow ejecuta primero los tests de contrato y después un
-smoke test de los dos contenedores.
+El workflow de [GitHub Actions](.github/workflows/ci.yml) ejecuta los tests de ambos servicios, la
+verificación Pact del proveedor y un smoke test de Compose.
